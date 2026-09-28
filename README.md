@@ -61,9 +61,13 @@ You can import your own market data to classfiy the regimes, only **ensure that 
 ## 局限与讨论 / Limitations and Discussion
 
 ### 1.机械分型不能等同于人类视觉判断  Rigid Fractals vs. Human Visual "Trend"
-作为主观交易员，不论是从应用目的还是减轻工作量出发，我们希望寻找一种算法来代替主观的判断。但是`Swing`算法划分出的`State 0/1/2`不能完全与肉眼划分的“波段”等同起来。
+作为主观交易员，不论是从应用目的还是减轻工作量出发，我们希望寻找一种算法来准确描述主观的判断。但是`Swing`算法划分出的`State 0/1/2`**不能完全与肉眼划分的“波段”等同起来**。
+
+As human traders, we always expected to use a certain algorithm to replicate our subjective opinions, either for application or for working less. However, the output `State 0/1/2` distinguished by `fractals` **cannot be equated with the macroscopic "trends" perceived by the human eye**. 
 
 例如，在一段行情的日线数据的可视化中(Fig 1.)，主观交易员可能会把这段时间分为一个主要的多头浪（May 23, 2023 - Oct 06, 2025）和一个主要的空头浪（Oct 06, 2025之后），或是在这两个大趋势中划分出更精细的形状。但是`Kaltist`在N=2参数下，将这一段数据切割成了非常的细小的周期。因此，简单的局部极值分型，绝不能简单等同于人类视觉感知中的“宏观大趋势”。简单的分型算法无法复现人类大脑对于市场状态的判断。
+
+For example, as shown in the Figure 1., a human trader would typically view the price action from May 23, 2023 to Oct 06, 2025 as a single, coherent "Bullish Trend", which follows by a "Bearish Trend" starting from Oct 06, 2025. Some traders may divide the data into more samller，precise trends. However, `Kaltsit` slices this period into numerous fragmented, rapidly switching states in the N=2 circumsatance. Simple local extrema fractals cannot be equated with the macroscopic "major trends" perceived by the human eye.
 
 <img width="2530" height="1027" alt="example_daily" src="https://github.com/user-attachments/assets/1e4c4f6f-7c61-4a24-9da9-3ac14c0c2e3c" />
 
@@ -72,11 +76,18 @@ You can import your own market data to classfiy the regimes, only **ensure that 
 <p align="center"> 画图工具/ Visual Tool: Eyjafalla-Quant Visualizer </p>
 
 ### Limitation 2.状态闪烁 State Flickering 
-道氏理论认为：”趋势一旦形成，则大概率会延续，直到出现明确的反转信号。”
+道氏理论认为：**“趋势一旦形成，则大概率会延续，直到出现明确的反转信号。”**
 
-人类交易员是在评估了**不确定数量的大量K线**后，通过宏观结构得出结论的，视野更加宏观。相比之下，算法受到参数$N$限制，一次只能在2N+1条K线中寻找极值，因此对于局部噪音极其敏感。会将价格波动误认为“趋势反转的信号”。具体表现为，Swing算法划分的市场状态经常在趋势`State 1/2`和震荡`State 0`间来回切换，每个状态的持续时间很短(Fig 1.)。这个缺陷本质上是参数N取值的问题。
+One of the core tenets of Dow Theory is: **"A trend is assumed to be in effect until it gives definite signals that it has reversed."**
+
+人类交易员是在评估了**不确定数量的大量K线**后，通过宏观结构得出结论的，视野更加宏观。相比之下，算法受到参数N限制，一次只能在2N+1条K线中寻找极值，因此对于局部噪音极其敏感，从而会将价格波动误认为“趋势反转的信号”。具体表现为，Swing算法划分的市场状态经常在趋势`State 1/2`和震荡`State 0`间来回切换，每个状态的持续时间很短(Fig 1.)。这个缺陷本质上是参数N取值的问题。
+
+Human traders reach conclusions by evaluating macro structures across **an uncertain and dynamic number of candlesticks**. Coversely, the viwe of algorithm is strictly confined to the 2N+1 rolling window, resulting its sensitivity of fluctuation. The algorithm often misinterprets a local, irrelevant price fluctuation as a structural breakdown, triggering false reversal signals and causing rapid state flickering between `Trend` and `Chaos`(Fig 1.). This fundamentally highlights the dilemma of selecting the window parameter N.
+
 ### Limitation 3.状态判断的算法滞后性 Inherent Algorithmic Lag
 为了解决N取值带来的小窗口问题，我们尝试增加N的数值,或是使用`Kaltsist`计算周线级别数据、再反向映射回日线，试图让机器拥有更广阔的视野。但是实际测试发现这会导致状态判断出现严重的滞后性(Fig 2.)。
+
+Since small windows cause flickering, we have tried to increase the value of N or use higher timeframes (e.g., Weekly, or weekly to daily) to give the machine a broader view. However, we observes significant lags on Trend Classification(Fig 2.).
 
 <img width="2525" height="1025" alt="example_weekly" src="https://github.com/user-attachments/assets/5b649104-de68-4eff-ab02-8c82e23346f6" />
 
@@ -84,9 +95,13 @@ You can import your own market data to classfiy the regimes, only **ensure that 
 
 <p align="center">画图工具/ Visual Tool: Eyjafalla-Quant Visualizer </p>
 
-例如，在Fig 2.中，算法将2段明显的上升趋势标注为`Trend Down`(Oct 2, 2023 - Dec 18, 2023)(Apr 14, 2025 - May 19, 2025)，这在人类交易员眼中是不应该发生的事情。
+例如，在Fig 2.中，算法将2段明显的上升趋势标注为`Trend Down`(Oct 2, 2023 - Dec 18, 2023, Apr 14, 2025 - May 19, 2025)，这在人类交易员眼中是不应该发生的事情。
 
-这种滞后性是算法为了避免未来函数而不可避免的问题。在确认一个点为极值时，**必须**等待其右侧走完N+1根K线。这意味着，当算法最终确认并在今天发出“趋势反转”信号时，实际上该极值点在N+1条K线前就已经发生了。只是当时的K线形态是未知的，趋势无法立刻确认。因此，简单粗暴地扩大N或提升时间维度，虽然能一定程度解决状态闪烁问题，但必然导致对真实市场变化的响应极度迟缓。也就是说，这种基于极值的简单分形算法，无法同时做到状态平滑与敏锐。
+For example, the algorithm classifies two significant Bullish Trend into `Trend Down`(Oct 2, 2023 - Dec 18, 2023 and Apr 14, 2025 - May 19, 2025), which is undoubtedly absurd in human's view.
+
+这种滞后性是算法为了**避免未来函数**而不可回避的问题。在确认一个点为极值时，**必须**等待其右侧走完N+1根K线。这意味着，当算法最终确认并在今天发出“趋势反转”信号时，实际上该极值点在N+1条K线前就已经发生了。只是当时的K线形态是未知的，趋势无法立刻确认。因此，简单粗暴地扩大N或提升时间维度，虽然能一定程度解决状态闪烁问题，但必然导致对真实市场变化的响应极度迟缓。也就是说，这种基于极值的简单分形算法，无法同时做到状态平滑与敏锐。
+
+The Lag of algorithm is an inevitable problem. To absolutely **prevent "Look-ahead Bias"**, the algorithm **must wait** for the formation of N+1 bars to the right before confirming an extremum. This implies that when the algorithm finally confirms a "trend reversal" today, the actual extremum occurred N+1 bars ago. At that specific moment, the future price action was unknown, and the trend could not be confirmed immediately. This explains why extrema-lookback algorithms can never achieve both acute sensitivity and perfect smoothness simultaneously. 
 
 ## ⚠️**免责声明 / Disclaimer:** 
 
